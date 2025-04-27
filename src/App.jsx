@@ -1,53 +1,111 @@
-import { useState } from "react";
+import { useEffect, useState,useContext } from "react";
+import axios from "axios";
+import { Routes,Route } from "react-router-dom";
 
 import "./App.css";
 import expenses from "../expenses";
 import "./Components/Expenses/CSS/Expense.css";
-
+import ExpensesStateVariablesAndFunctions from "./Contexts/ExpensesAppContext";
 import Card from "./Components/ExpenseCard/Card";
 import ExpensesList from "./Components/Expenses/ExpenseList";
 import NewExpenseFormFunction from "./Components/NewExpenseForm/NewExpenseFormFunction";
+import { NewExpenseFormContextWraper } from "./Contexts/NewExpenseFormContext";
+import ExpenseItem from "./Components/Expenses/ExpensesItems";
+// import ExpenseListUI from "./Components/Expenses/ExpenseListUI";
 
 function App() {
-  const [count, setCount] = useState(0);
+  let count = 0
+  count++
+  console.log(`App Rendered ${count} time${count>1?`s`:``} `)
+  const [newExpense, setNewExpense] = useState(0);
   const [formSwitch, setFormSwitch]= useState(false)
-  const expenses_ = expenses;
+  const [year, setYear] = useState(2025);
+  const [Expenses , setExpenses] = useState([{
+    title:'stock',
+    amount:'20',
+    date: "2025-04-02T00:00:00.000Z"
+  }])
+  const expensesFilteredByYear = Expenses.filter(
+    (element, i) => new Date (element.date).getFullYear() === year
+  );
+  // const expenses_ =expenses;
 
-  const getNewExpenseData = (data) =>{
-        const NewExpenseDataObj = {...data};
-        expenses_.push(NewExpenseDataObj);
-        setCount((prev)=>prev+1)
-        // console.log(expenses_);
-  };
-  const getFunctionFromAppForGettingYear = function(year){
-    const Year = year 
-    return (Year);
-};
+  // console.log(newExpense)
+  useEffect(()=>{
+  //  let ExpenseCopy = [];
+    axios.get('/api/expenses?param1=34&mock2=30')
+    .then(response=>{
+      // WE CAN ALSO USE forEach LOOP TO CONVER DATE FROM STRING TO ACTUAL DATE LIKE new Date(el.date)
 
-const expenseListComponent = <ExpensesList Expenses={expenses_} fState = {formSwitch}  setFormState = {setFormSwitch} getYear={getFunctionFromAppForGettingYear} ></ExpensesList>
+      // const dataConvertedDate = response.data.map(el=>el.date = new Date(el.date))
+      // console.log(dataConvertedDate)
+      setExpenses([...response.data])
+      // console.log(typeof response)
+      //  console.log(response.data)
+
+      // ExpensesFrombackend = [...ExpensesFrombackend,...response.data];
+      // console.log(Expenses)
+      // console.log(ExpensesFrombackend);
+    });  
+  },[newExpense]);
   
-const showForm = function (){ 
-      return formSwitch ?
-       <>
-       <NewExpenseFormFunction getData = {getNewExpenseData} setFormState = {setFormSwitch} ></NewExpenseFormFunction>
-       {expenseListComponent}
-       </>
-      : 
-      <>
-       {expenseListComponent} 
-      </>
-};       
+  // console.log(Expenses)// it wont show new expenses but rather the current expenses cuz setExpenses fucntion will run and set the expenses on next render where useeffect wont run again  i guess
+  const getNewExpenseData = (data) =>{
+        
+        const NewExpenseDataObj = {...data};
+        // expenses_.push(NewExpenseDataObj);
+        // setCount((prev)=>prev+1)
+        // console.log(expenses_);
+        
+  };
+//   const getFunctionFromAppForGettingYear = function(year){
+//     const Year = year 
+//     return (Year);
+// };
+
+// const expenseListComponent = <ExpensesList Expenses={Expenses} fState = {formSwitch}  setFormState = {setFormSwitch} getYear={getFunctionFromAppForGettingYear} ></ExpensesList>
+const expenseListComponent = <ExpensesList/>
+// const AppUI = function (){ 
+//       return <>
+// {expenseListComponent}
+//       </>
+//       // formSwitch ?
+       
+//        {/* <NewExpenseFormFunction getData = {getNewExpenseData} setFormState = {setFormSwitch} setCount={setCount}></NewExpenseFormFunction> */}
+//       {/* <NewExpenseFormFunction /> */}
+       
+       
+//       // : 
+//       // <>
+//       //  {expenseListComponent} 
+//       // </>
+// };       
  
   return (
-    showForm()
-  );
-  
-};
+
+    <ExpensesStateVariablesAndFunctions.Provider  value={{newExpense,setNewExpense,formSwitch,setFormSwitch,Expenses,setExpenses,getNewExpenseData,year,setYear,expensesFilteredByYear}}>
+        <NewExpenseFormContextWraper>
+     <Routes>
+        <Route path= '/edit/:expenseid' element={<NewExpenseFormFunction/>} />
+        <Route path='/' element={<ExpensesList/>} />
+     </Routes>
+        </NewExpenseFormContextWraper>
+    </ExpensesStateVariablesAndFunctions.Provider>
+    
+  )
+  //making a view with number of buttons navigating to corresponding compoenent UI with back button for each UI
+
+};//can these components in element prop have their own router and routes like which we doing here
 
 export default App;
 
+// {showForm()}
 
-
+// {Expenses ? Expenses.map((ex,i)=>(
+//   <div className="bg-amber-400 text-center"  >{ex.title}</div>
+// )):
+// <div> No expenses yet </div>
+// }
 
 
 

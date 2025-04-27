@@ -1,45 +1,56 @@
 import ExpenseItem from "./ExpensesItems";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import Card from "../ExpenseCard/Card";
-import {
-  ConfiguredStateIncrease,
-  ConfiguredStateDecrease,
-} from "./UtilityFunctions/StateCounters";
+import ExpensesStateVariablesAndFunctions from "../../Contexts/ExpensesAppContext";
+import NewExpenseFormFunction from "../NewExpenseForm/NewExpenseFormFunction";
+import {NewExpenseFormContextWraper} from "../../Contexts/NewExpenseFormContext";
+// import {list} from "./ExpenseListUI";
+import { useNavigate,useParams } from "react-router-dom";
+let count = 1
+const ExpensesList = () => {
+  console.log(`ExpenseList rendered ${count} time${count>1?`s`:null} `);
+  count++;
 
-const ExpensesList = (propsFromApp) => {
-  const Expenses = propsFromApp.Expenses;
-  const fState = propsFromApp.fState;
-  const [year, setyear] = useState(2021);
+const {Expenses,formSwitch,setFormSwitch,year,setYear,expensesFilteredByYear} = useContext(ExpensesStateVariablesAndFunctions)
+ const navigate = useNavigate();
+const {alone} = useParams();
+// const {}= useContext(NewExpenseFormContextWraper)
+  // const Expenses = propsFromApp.Expenses;
+  // const fState = propsFromApp.fState;
+  // const [year, setyear] = useState(2021);
 
-  const filteredListByYear = Expenses.filter(
-    (element, i) => element.date.getFullYear() === year
-  );
+  //  const ExpensesDateConverted = Expenses.map(Ex=> Ex.date = new Date(Ex.date));
 
-  console.log(Expenses[0].date.getFullYear());
+  // const expensesFilteredByYear = Expenses.filter(
+  //   (element, i) => new Date (element.date).getFullYear() === year
+  // );
+
+  // console.log(Expenses[0].date.getFullYear());
   const list = () => {
     // let reversed = [...Expenses].reverse();
-    //    let reversed = structuredClone(filteredListByYear)
+       let reversed = structuredClone(expensesFilteredByYear).reverse();
     return (
-      filteredListByYear
+      // filteredListByYear
         // .slice(0,count)
-        // .reverse()
-        .map((element) => <ExpenseItem ExpenseElement={element}></ExpenseItem>)
+        reversed
+        .map((element) => <div key={element.id}><ExpenseItem  ExpenseElement={element} ></ExpenseItem></div>)
     ); // hum yahi say
     // bhi no elemnts found wala kaam krsaktay hein:<p>no elements found</p>
     //  console.log(list)
   };
 
   const addNewExpenseButtonHandler = function () {
-    propsFromApp.setFormState(true);
+     setFormSwitch(true);
   };
 
   const onChangeyearFilterHandler = function (e) {
-    console.log(e.target.id);
-    setyear(Number(e.target.value));
+    // console.log(e.target.id);
+    setYear(Number(e.target.value));
   };
 
   const ExpenseDateFilterUI = (
-    <Card className="expenses">
+    <Card className=" m-2 px-1 w-[20%] hover:bg-gray-500">
+      <span >Filter</span>
       <select
       className="bg-grey"
         value={year}
@@ -54,8 +65,8 @@ const ExpensesList = (propsFromApp) => {
   );
 
   const Expense_Items_List =
-    list().length === 0 ? <p> no expenses found</p> : list();
-  const New_Expense_Button = fState ? null : (
+  list().length === 0 ? <p> no expenses found</p> : list();
+  const New_Expense_Button = formSwitch ? null : (
     <button onClick={addNewExpenseButtonHandler}>Add New Expense</button>
   );
   const monthArray = [
@@ -74,8 +85,8 @@ const ExpensesList = (propsFromApp) => {
   ];
   const valueArray = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   // const heightarray = array.map(n=>`h-${n}`)
-  filteredListByYear.forEach((n, i) => {
-    const month = n.date.getMonth();
+  expensesFilteredByYear.forEach((n, i) => {
+    const month = new Date(n.date).getMonth();// month in NumberType starting from 0 to 11
     valueArray[month] += 1;
   });
   console.log(valueArray);
@@ -85,7 +96,7 @@ const ExpensesList = (propsFromApp) => {
     return (
       <div className="flex justify-center border-1 p-2 mb-3 mt-3 rounded-t-2xl rounded-b-2xl space-x-8">
         {valueArray.map((n, i) => (
-          <div className="flex flex-col space-y-2">
+          <div key = {monthArray[i]} className="flex flex-col space-y-2">
             <div className="flex flex-col-reverse items-center bg-blue-500 h-30 w-4 text-red-900 border-1 border-purple-950 rounded-t-2xl rounded-b-2xl">
               <div
                 style={{ height: `${n===maxValue ? 100: (n*100)/maxValue}%` }}
@@ -100,18 +111,45 @@ const ExpensesList = (propsFromApp) => {
   };
   const showExpenseList = function () {
     return (
-      <Card className="expenses">
-        {New_Expense_Button}
-        {ChartBoxComponent(monthArray)}
-        {ExpenseDateFilterUI}
-        {Expense_Items_List}
+     <Card className="expenses text-center ">
+       {alone ?  
+       null:
+        <NewExpenseFormContextWraper>
+        {formSwitch ? <NewExpenseFormFunction/> : null}
+        </NewExpenseFormContextWraper>
+       }
+
+        {alone ? null  : New_Expense_Button}
+        {alone ? null: ChartBoxComponent(monthArray)}
+         {alone ?  null : ExpenseDateFilterUI}
+    
+        <Card className= 'max-h-screen px-2 py-1 overflow-auto'>
+          
+        <NewExpenseFormContextWraper>
+            {Expense_Items_List}
+        </NewExpenseFormContextWraper>
+        </Card>
+
       </Card>
     );
   };
   return showExpenseList();
 };
 export default ExpensesList;
+
+
+    // {/* {alone? null: <button onClick = {navigate(`/expenses/1`)}>Show Expenses Separatly</button>} */}
+
+
+
+
+
 //but but but how can i store state of filtered items
+
+// import {
+//   ConfiguredStateIncrease,
+//   ConfiguredStateDecrease,
+// } from "./UtilityFunctions/StateCounters";
 
 // console.log(count);
 // const getFunctionFromAppForGettingYear = function(){
