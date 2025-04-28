@@ -1,11 +1,11 @@
 import './Card.css'
 
-const Card = (props)=>{
- const classes = `Card  ${props.className}`;// baad mein anay wala class replace karay ka css properties ko shaid
+const Card = ({children,className})=>{
+ const classes = `Card  ${className}`;// baad mein anay wala class replace karay ka css properties ko shaid
 return(
     <div className={classes}>
 
-        {props.children}
+        {children}
 
     </div>
     // to jin custom aor builtin elements ya tags ko jab ham wrap 
