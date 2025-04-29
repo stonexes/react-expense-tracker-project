@@ -21,7 +21,7 @@ function App() {
   const [formSwitch, setFormSwitch]= useState(false)
   const [year, setYear] = useState(2025);
   const [Expenses , setExpenses] = useState([{
-    id:Date.now(),
+    id:`s1`,
     title:'stock',
     amount:'20',
     date: "2025-04-02T00:00:00.000Z"
